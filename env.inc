@@ -6,4 +6,3 @@ TAUROOTDIR=$(TAUDIR)
 CC=$(TAUDIR)/$(TAU_ARCH)/bin/tau_cc.sh
 CXX=$(TAUDIR)/$(TAU_ARCH)/bin/tau_cxx.sh
 F90=$(TAUDIR)/$(TAU_ARCH)/bin/tau_f90.sh
-TAU_MAKEFILE=$(TAU)/Makefile.tau-mpi-pdt-fujitsu
