@@ -1,0 +1,233 @@
+TAU ON THE K COMPUTER
+
+TAU (Tuning and Analysis Utilities) is performance analysis tool framework. TAU installation on the K computer provides profiling and event tracing features for C, C++ and Fortran programs. 
+
+Complete TAU documentation can be found here: https://www.cs.uoregon.edu/research/tau/docs.php.
+
+
+
+PROFILING 
+
+
+Profiling helps to understand which routines, loops and statements in user program consume most of the time. 
+To enable profiling TAU on K provides two methods of user program instrumentation: Source based and Compiler based. Source based instrumentation can track more events compared to Compiler based instrumentation. Compiler based instrumentation requires re-compiling target application and Source instrumentation aditionally requires PDT library, which is also installed on the K computer.
+The mentioned above instrumentation methods uses TAU and, optionally, PDT. These methods will be referred to as "TAU native instrumentation" in this document. It is also possible to use Score-P for instrumentation, and it is has several benefits descibed below.
+
+
+
+SCORE-P
+
+TAU has it's own instrumentation capabilities: Source-based, Compiler-based (and Dynamic, which is not available on the K computer) as described below. However, using Score-P for instrumentation is preferred as it allows simultaneous profiling and tracing, and profilies will have more metrics compared to TAU native instrumentation. 
+
+
+INSTRUCTIONS FOR INSTRUMENTATION WITH SCORE-P 
+
+Set environment variables:
+
+> source /opt/aics/TAU/env.sh
+
+Setting below variable will make TAU use Score-P for instrumentation:
+
+> export TAU_SCOREP=1
+
+Change TAU_MAKEFILE varable to use Score-P instead of PDT instead of PDT:
+
+> export TAU_MAKEFILE="$TAU/Makefile.tau-mpi-pdt-scorep-fujitsu"
+
+Make sure you have TAU variable initialised.
+
+
+For building instrumented binaries from source code use these scripts instead of Fujitsu compilers:
+tau_f90.sh, tau_cc.sh, and tau_cxx.sh.
+For example, use tau_cc.sh to compile a C program by typing:
+> tau_cc.sh sampleCprogram.c 
+or chaging compiler from mpifccpx to tau_cc.sh in the makefile. 
+
+
+In your job script you can use the following variables:
+
+SCOREP_EXPERIMENT_DIRECTORY -- to set direcotry for storing profiles and traces. You also have to add stage-out rules for this direcotry to stage out profiles and traces,
+SCOREP_PROFILING_FORMAT -- which profile format to use, 
+SCOREP_ENABLE_TRACING -- set to 1 to enable tracing.
+
+For more information see:  https://silc.zih.tu-dresden.de/scorep-current/pdf/scorep.pdf
+
+
+Sample fragment of job script:
+
+#PJM --stgout "rank=* ./scorep_sum/*.* ./scorep_sum/"
+#PJM --stgout "rank=* ./scorep_sum/traces/*.* ./scorep_sum/traces/"
+export SCOREP_EXPERIMENT_DIRECTORY=scorep_sum
+export SCOREP_PROFILING_FORMAT=CUBE4
+export SCOREP_ENABLE_TRACING=1
+
+
+
+
+
+
+TAU NATIVE INSTRUMENTATION
+
+
+SOURCE BASED INSTRUMENTATION INSTRUCTIONS
+
+
+Set TAU environment variables on K login node in the shell you use for building your program:
+
+> source /opt/aics/TAU/env.sh
+
+Make sure you TAU_MAKEFILE variable is set to
+/opt/aics/TAU/tau-2.24.1/sparc64fx/lib/Makefile.tau-mpi-pdt-fujitsu
+
+
+TAU provides these scripts: tau_f90.sh, tau_cc.sh, and tau_cxx.sh to instrument and compile Fortran, C, and C++ programs respectively. You might use tau_cc.sh to compile a C program by typing:
+
+> tau_cc.sh sampleCprogram.c
+
+
+
+COMPILER-BASED INSTRUMENTATION INSTRUCTIONS
+
+
+Set TAU environment variables on K login node in the shell you use for building your program:
+
+> source /opt/aics/TAU/env.sh
+
+TAU provides these scripts: tau_f90.sh, tau_cc.sh, and tau_cxx.sh to instrument and compile Fortran, C, and C++ programs respectively. You might use tau_cc.sh to compile a C program by typing:
+
+> tau_cc.sh -tau_options=-optCompInst sampleCprogram.c
+
+You can also set options in an environment variable:
+
+>export TAU_OPTIONS=-optCompInst
+>tau_cc.sh sampleCprogram.c
+
+
+
+OPTIONS TO TAU COMPILER SCRIPTS
+
+
+These are some commonly used options available to the TAU compiler scripts. Either set them via the TAU_OPTIONS environment variable or the -tau_options= option to tau_f90.sh, tau_cc.sh, or tau_cxx.sh
+
+-optVerbose     Enable verbose output (default: on)
+-optKeepFiles      Do not remove intermediate files
+
+A list of options for the TAU compiler scripts can be found by typing man tau_compiler.sh or in the reference guide here: https://www.cs.uoregon.edu/research/tau/docs/newguide/re01.html.
+
+
+
+CHECK BINARY INSTRUMENTATION 
+
+
+Instrumented binary will contain TAU objects that enable program profiling and tracing. To make sure the binary contains TAU objects you can check it with the following command:
+
+ >nm -a instrumented_binary_file | grep -i tau | wc -l
+
+The command will return the number of TAU objects. 
+
+
+
+PROFILING INSTRUCTIONS
+
+
+To produce profile for your application with instrumented binaries, include the following line in the job script for staging out profiles from compute nodes to login nodes:
+
+#PJM --stgout "./profile.* ./profiles/"
+
+Then submit your job as usual for running instrumented binary on the K computer. After the job is finished profile files will be saved in "profiles" directory. 
+
+
+
+TRACING
+
+
+Typically, profiling shows the distribution of execution time across routines. It can show the code locations associated with specific bottlenecks, but it can not show the temporal aspect of performance variations. Tracing the execution of a parallel program shows when and where an event occurred in terms of the process that executed it and the location in the source code. 
+Tracing can be done using instrumented binary (see Source based and Compiler based instrumentation sections). 
+
+
+
+TRACING INSTRUCTIONS
+
+
+In your job script insert the following lines for staging out trace files:
+
+#PJM --stgout "rank=* ./events.* ./trace_dir/"
+#PJM --stgout "rank=* ./tautrace.* ./trace_dir/"
+
+Substitute "trace_dir" with any existing directory name. 
+
+Also include the following lines to set up environment variables on computer nodes:
+
+. /opt/aics/TAU/env.sh
+export TAU_PROFILE="0"
+export TAU_TRACE="1"
+
+You can also set TAU_THROTTLE="1" to enable TAU throttle feature for large programs (see https://www.cs.uoregon.edu/research/tau/docs/tutorial/ch01s05.html). 
+
+
+
+VISUALISATION
+
+
+For viewing profiles and traces TAU provides respectively Paraprof and Jumpshot programs. 
+We recommend that you install TAU with these programs locally on your computer as using them over network is extremely slow. You can download profiles/traces to your computer or mount K folder with profiles/traces to your computer with SSHFS. 
+
+TAU distributions for different operating systems can be downloaded from here: https://www.cs.uoregon.edu/research/tau/downloads.php.
+
+
+
+PARAPROF
+
+
+For profile visualisation start Paraprof program. 
+From menu select File > Open...,
+In TAU: ParaProf: Load Trail window in Trial Type select "TAU profiles". Press "Select Directory" button and navigate to the parent directory of the directory with profiles. Highlight the profiles directory and press "Select", then "Ok" button. 
+
+A new window with profile visualisation will open. 
+Paraprof user manual can be found here: https://www.cs.uoregon.edu/research/tau/docs/paraprof/.
+
+
+
+JUMPSHOT
+
+
+To use Jumpshot for TAU traces visualisation you need to merge traces and convert merged file to SLOG2 format. 
+TAU produces two files: events.*.edf and tautrace.*.trc for every MPI rank. 
+To merge individual traces use 
+
+> . /opt/aics/TAU/env.sh
+> tau_treemerge.pl
+
+This will produce two files: tau.trc and tau.edf.
+Then execute:
+
+> traceconv.sh tau.trc
+
+This will produce tau.slog2 file that can be viewed in Jumpshot.
+
+Open Jumpshot and from top menu select: File > Select...
+Navigate to the directory with traces and select tau.slog2 file. Click "Open".
+
+
+A new window with profiles will open. Please note, that for a large trace files (with more than a few hundreds MPI ranks)  Jumpshot may need a few minutes or longer to render traces. 
+Jumpshot user guide can be found here: http://www.mcs.anl.gov/research/projects/perfvis/software/viewers/jumpshot-4/usersguide.html.
+
+
+
+NOTES
+
+
+* TAU dynamic instrumentation feature does not work on the K computer due to problems with porting Dyninst program to Sparc architecture. 
+
+* TAU features not mentioned in this README have not been tested on K computer and might not work. 
+
+* TAU is being developed jointly by the University of Oregon, Los Alamos National Laboratory, and Research Centre Julich, ZAM, Germany. 
+
+
+
+CONTACTS
+
+Bryzgalov Peter (petr.bryzgalov at riken dot jp)
+
+
+Last edit: 2015.08.17
