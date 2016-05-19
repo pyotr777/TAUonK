@@ -22,7 +22,7 @@ OPARI=/opt/aics/tw20/scorep/REL-1.4.2
 
 binutils="binutils-2.23.2.tar.gz"
 
-function install_tau {
+function install_pdt {
     echo "********************"
     echo "* Install PDT $PDT_VER "
     echo "********************"
@@ -49,7 +49,10 @@ function install_tau {
 
     export PATH=$PATH:$PDT_DIR/x86_64/bin
     cd ..
+}
 
+
+function install_tau {
     echo "**********************"
     echo "* Install TAU $TAU_VER "
     echo "**********************"
@@ -66,7 +69,9 @@ function install_tau {
         mkdir -p "$TAU_DIR/external_dependencies"
         cp "$binutils" "$TAU_DIR/external_dependencies/$binutils"
     fi
-    tar -xzvf tau-$TAU_VER.tar.gz -C $BASEDIR
+    if [[ ! -d $TAU_DIR ]]; then
+        tar -xzvf tau-$TAU_VER.tar.gz -C $BASEDIR
+    fi
     cd $TAU_DIR
 
     ./configure -pdt=$PDT_DIR -pdt_c++=g++ -arch=sparc64fx -prefix=$TAU_DIR  -c++=mpiFCCpx -cc=mpifccpx -fortran=mpifrtpx -mpi -bfd=download -iowrapper
@@ -117,12 +122,12 @@ function install_tau_scorep {
 }
 
 if [[ -n "$1" ]]; then
-    if [[ "$1" == "-clean" ]]; then
+    if [[ "$1" == "clean" ]]; then
         echo "*********************"
         echo "* Clean directories *"
         echo "*********************"
-        rm -rf pdtoolkit-3.21
-        rm -rf tau-2.25
+#        rm -rf pdtoolkit-3.21
+#        rm -rf tau-2.25
         rm -rf $TAU_DIR
         rm -rf $PDT_DIR
         rm -rf $SCOREPDIR
@@ -137,9 +142,15 @@ if [[ -n "$1" ]]; then
         ./configure -arch=sparc64fx
         make install
         exit 0
-    elif [[ "$1" == "-install" ]]; then
+    elif [[ "$1" == "install" ]]; then
+        install_pdt
         install_tau
         exit 0  
+    elif [[ "$1" == "tau" ]]; then
+        export PATH=$PATH:$PDT_DIR/x86_64/bin
+        cd $BASEDIR
+        install_tau
+        exit 0
     elif [[ "$1" == "scorep" ]]; then
         install_tau_scorep
         exit 0
@@ -153,8 +164,9 @@ if [[ -n "$1" ]]; then
 fi
 
 echo "Options:"
-echo "  -install      install PDT and TAU for sparc64fx architecture"
-echo "  -clean        clean installation directories"
+echo "  install      install PDT and TAU for sparc64fx architecture"
+echo "  tau          install TAU for sparc64fx architecture (do not install PDT)"
+echo "  clean        clean installation directories"
 echo "  x86           configure TAU for x86_64 architecture"
 echo "  sparc64fx     configure TAU for sparc64fx architecture"
 echo "  scorep        install ScoreP and configure TAU to use Score-P"
