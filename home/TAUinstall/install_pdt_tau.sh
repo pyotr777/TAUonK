@@ -21,6 +21,7 @@ SCOREPDIR=$BASEDIR/scorep/$SCOREP_VER
 OPARI=/opt/aics/tw20/scorep/REL-1.4.2
 
 binutils="binutils-2.23.2.tar.gz"
+EDITED_DIR=$(pwd)/edited
 
 function install_pdt {
     echo "********************"
@@ -31,10 +32,6 @@ function install_pdt {
         mkdir -p "$BASEDIR"
     fi
     cd $BASEDIR
-#    if [[ ! -a pdt_lite.tgz ]]; then
-#        curl -OL http://tau.uoregon.edu/pdt_lite.tgz
-#    fi
-#    tar -xzvf pdt_lite.tgz
     if [[ ! -a pdtoolkit-$PDT_VER.tar.gz ]]; then
         wget https://www.cs.uoregon.edu/research/tau/pdt_releases/pdtoolkit-$PDT_VER.tar.gz
     fi
@@ -56,10 +53,7 @@ function install_tau {
     echo "**********************"
     echo "* Install TAU $TAU_VER "
     echo "**********************"
-
-#    if [[ ! -a tau.tgz ]]; then
-#        curl -OL http://tau.uoregon.edu/tau.tgz
-#    fi
+    cd $BASEDIR
     if [[ ! -a tau-$TAU_VER.tar.gz ]]; then
         wget https://www.cs.uoregon.edu/research/tau/tau_releases/tau-$TAU_VER.tar.gz
     fi
@@ -72,8 +66,9 @@ function install_tau {
     if [[ ! -d $TAU_DIR ]]; then
         tar -xzvf tau-$TAU_VER.tar.gz -C $BASEDIR
     fi
+    # Copy edited files
+    cp -R $EDITED_DIR/* $TAU_DIR/
     cd $TAU_DIR
-
     ./configure -pdt=$PDT_DIR -pdt_c++=g++ -arch=sparc64fx -prefix=$TAU_DIR  -c++=mpiFCCpx -cc=mpifccpx -fortran=mpifrtpx -mpi -bfd=download -iowrapper
     make install
 }
@@ -126,10 +121,9 @@ if [[ -n "$1" ]]; then
         echo "*********************"
         echo "* Clean directories *"
         echo "*********************"
-#        rm -rf pdtoolkit-3.21
-#        rm -rf tau-2.25
         rm -rf $TAU_DIR
         rm -rf $PDT_DIR
+        rm -rf $BASEDIR/pdtoolkit-$PDT_VER
         rm -rf $SCOREPDIR
         exit 0
     elif [[ "$1" == "x86" ]]; then
@@ -148,7 +142,6 @@ if [[ -n "$1" ]]; then
         exit 0  
     elif [[ "$1" == "tau" ]]; then
         export PATH=$PATH:$PDT_DIR/x86_64/bin
-        cd $BASEDIR
         install_tau
         exit 0
     elif [[ "$1" == "scorep" ]]; then
