@@ -32,7 +32,7 @@ function convert_trace() {
 	edfile="$name.edf"
 	tracefile="$name.trc"
 	slog2file="$name.slog2"
-	echo "Use $taudir/tau2slog2 to convert $tracefile to $slog2file"
+	echo "Using $taudir/tau2slog2 to convert $tracefile to $slog2file"
 	if [ -f $slog2file ]
 		then
 		echo $slog2file exists

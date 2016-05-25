@@ -116,6 +116,18 @@ function install_tau_scorep {
     make install
 }
 
+function install_traceconv {
+	filename="traceconvert.sh"
+	if [ ! -f "$TAU_DIR/x86_64/bin/$filename" ]; then
+		echo "Copying $filename to $TAU_DIR/x86_64/bin"
+		if [ ! -f "./$filename" ]; then
+			echo "File $filename not found!"
+		else
+			cp ./$filename $TAU_DIR/x86_64/bin/
+		fi
+	fi
+}
+
 if [[ -n "$1" ]]; then
     if [[ "$1" == "clean" ]]; then
         echo "*********************"
@@ -129,12 +141,15 @@ if [[ -n "$1" ]]; then
     elif [[ "$1" == "x86" ]]; then
         cd $TAU_DIR
         ./configure -arch=x86_64
-        make install
+        # make install
+		install_traceconv
+		cd -
         exit 0
     elif [[ "$1" == "sparc64fx" ]]; then 
         cd $TAU_DIR
         ./configure -arch=sparc64fx
-        make install
+        # make install
+		cd -
         exit 0
     elif [[ "$1" == "install" ]]; then
         install_pdt
@@ -149,9 +164,12 @@ if [[ -n "$1" ]]; then
         exit 0
     elif [[ "$1" == "openmp" ]]; then
         cd $TAU_DIR
-        #./configure -openmp -opari=$OPARI -bfd=download -pdt=$PDT_DIR -pdt_c++=g++ -prefix=$TAU_DIR -arch=sparc64fx -c++=mpiFCCpx -cc=mpifccpx -fortran=mpifrtpx -mpi
-        ./configure -openmp -opari=$OPARI -bfd=download -pdt=$PDT_DIR -pdt_c++=g++ -prefix=$TAU_DIR -arch=sparc64fx -c++=m    piFCCpx -cc=mpifccpx -fortran=mpifrtpx -mpi -DISABLESHARED 
-        make install
+		if [ -n "$OPARI" ]; then 
+			$OPARI="=$OPARI"
+		fi
+        ./configure -openmp -opari$OPARI -bfd=download -pdt=$PDT_DIR -pdt_c++=g++ -prefix=$TAU_DIR -arch=sparc64fx -c++=mpiFCCpx -cc=mpifccpx -fortran=mpifrtpx -mpi
+        #./configure -openmp -opari=$OPARI -bfd=download -pdt=$PDT_DIR -pdt_c++=g++ -prefix=$TAU_DIR -arch=sparc64fx -c++=mpiFCCpx -cc=mpifccpx -fortran=mpifrtpx -mpi -DISABLESHARED 
+        # make install
         cd -
     fi
 fi
