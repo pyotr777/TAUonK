@@ -145,7 +145,7 @@ if [[ -n "$1" ]]; then
         exit 0
     elif [[ "$1" == "x86" ]]; then
         cd $TAU_DIR
-        ./configure -arch=x86_64
+        ./configure -arch=x86_64 -TRACE
         # make install
 		install_traceconv
 		cd -
