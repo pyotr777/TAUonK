@@ -117,15 +117,17 @@ function install_tau_scorep {
 }
 
 function install_traceconv {
-	filename="traceconvert.sh"
-	if [ ! -f "$TAU_DIR/x86_64/bin/$filename" ]; then
-		echo "Copying $filename to $TAU_DIR/x86_64/bin"
-		if [ ! -f "./$filename" ]; then
-			echo "File $filename not found!"
-		else
-			cp ./$filename $TAU_DIR/x86_64/bin/
+	files=(traceconvert.sh traceconv.sh)
+	for	filename in ${files[@]}; do
+		if [ ! -f "$TAU_DIR/x86_64/bin/$filename" ]; then
+			echo "Copying $filename to $TAU_DIR/x86_64/bin"
+			if [ ! -f "./$filename" ]; then
+				echo "File $filename not found!"
+			else
+				cp ./$filename $TAU_DIR/x86_64/bin/
+			fi
 		fi
-	fi
+	done
 }
 
 if [[ -n "$1" ]]; then
