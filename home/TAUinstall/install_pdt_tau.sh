@@ -146,14 +146,14 @@ if [[ -n "$1" ]]; then
     elif [[ "$1" == "x86" ]]; then
         cd $TAU_DIR
         ./configure -arch=x86_64 -TRACE
-        # make install
+        make install
 		install_traceconv
 		cd -
         exit 0
     elif [[ "$1" == "sparc64fx" ]]; then 
         cd $TAU_DIR
         ./configure -arch=sparc64fx
-        # make install
+        make install
 		cd -
         exit 0
     elif [[ "$1" == "install" ]]; then
@@ -171,7 +171,7 @@ if [[ -n "$1" ]]; then
         cd $TAU_DIR
         ./configure -openmp -opari -bfd=download -pdt=$PDT_DIR -pdt_c++=g++ -prefix=$TAU_DIR -arch=sparc64fx -c++=mpiFCCpx -cc=mpifccpx -fortran=mpifrtpx -mpi
         #./configure -openmp -opari=$OPARI -bfd=download -pdt=$PDT_DIR -pdt_c++=g++ -prefix=$TAU_DIR -arch=sparc64fx -c++=mpiFCCpx -cc=mpifccpx -fortran=mpifrtpx -mpi -DISABLESHARED 
-        # make install
+        make install
         cd -
     fi
 fi
