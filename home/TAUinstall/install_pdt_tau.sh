@@ -11,6 +11,8 @@
 # (C) 2015 RIKEN AICS
 # Created by Peter Bryzgalov
 
+CURDIR=$(pwd)
+
 BASEDIR=$HOME/TAU
 PDT_VER=3.22
 TAU_VER=2.25.1
@@ -21,7 +23,7 @@ SCOREPDIR=$BASEDIR/scorep/$SCOREP_VER
 OPARI=/opt/aics/tw20/scorep/REL-1.4.2
 
 binutils="binutils-2.23.2.tar.gz"
-EDITED_DIR=$(pwd)/edited
+EDITED_DIR=$CURDIR/edited
 
 function install_pdt {
     echo "********************"
@@ -117,6 +119,7 @@ function install_tau_scorep {
 }
 
 function install_traceconv {
+	cd $CURDIR
 	files=(traceconvert.sh traceconv.sh)
 	for	filename in ${files[@]}; do
 		if [ ! -f "$TAU_DIR/x86_64/bin/$filename" ]; then
@@ -166,10 +169,7 @@ if [[ -n "$1" ]]; then
         exit 0
     elif [[ "$1" == "openmp" ]]; then
         cd $TAU_DIR
-		if [ -n "$OPARI" ]; then 
-			$OPARI="=$OPARI"
-		fi
-        ./configure -openmp -opari$OPARI -bfd=download -pdt=$PDT_DIR -pdt_c++=g++ -prefix=$TAU_DIR -arch=sparc64fx -c++=mpiFCCpx -cc=mpifccpx -fortran=mpifrtpx -mpi
+        ./configure -openmp -opari -bfd=download -pdt=$PDT_DIR -pdt_c++=g++ -prefix=$TAU_DIR -arch=sparc64fx -c++=mpiFCCpx -cc=mpifccpx -fortran=mpifrtpx -mpi
         #./configure -openmp -opari=$OPARI -bfd=download -pdt=$PDT_DIR -pdt_c++=g++ -prefix=$TAU_DIR -arch=sparc64fx -c++=mpiFCCpx -cc=mpifccpx -fortran=mpifrtpx -mpi -DISABLESHARED 
         # make install
         cd -
