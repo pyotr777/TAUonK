@@ -152,10 +152,10 @@ function install_traceconv {
     for filename in ${files[@]}; do
         if [ ! -f "$TAU_DIR/x86_64/bin/$filename" ]; then
             echo "Copying $filename to $TAU_DIR/x86_64/bin"
-            if [ ! -f "./$filename" ]; then
+            if [ ! -f "$CURDIR/$TARFILES_DIR/$filename" ]; then
                 echo "File $filename not found!"
             else
-                cp ./$filename $TAU_DIR/x86_64/bin/
+                cp $CURDIR/$TARFILES_DIR/$filename $TAU_DIR/x86_64/bin/
             fi
         fi
     done
