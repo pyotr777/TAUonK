@@ -8,8 +8,10 @@
 #
 # Use -clean flag for removing (old) installation directores and files before install 
 #
-# (C) 2015 RIKEN AICS
+# (C) 2015-2016 RIKEN AICS
 # Created by Peter Bryzgalov
+
+echo "TAU on K installation script v1.0"
 
 CURDIR="$(pwd)"
 TARFILES_DIR="files"
