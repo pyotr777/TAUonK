@@ -11,19 +11,20 @@
 # (C) 2015 RIKEN AICS
 # Created by Peter Bryzgalov
 
-CURDIR=$(pwd)
-
-BASEDIR=$HOME/TAU
-PDT_VER=3.22
-TAU_VER=2.25.1
-PDT_DIR=$BASEDIR/pdt-$PDT_VER
-TAU_DIR=$BASEDIR/tau-$TAU_VER
+CURDIR="$(pwd)"
+TARFILES_DIR="files"
+BASEDIR="$HOME/TAU"
+PDT_VER="3.22"
+TAU_VER="2.25.1"
+PDT_DIR="$BASEDIR/pdt-$PDT_VER"
+TAU_DIR="$BASEDIR/tau-$TAU_VER"
 SCOREP_VER="1.4.2"
-SCOREPDIR=$BASEDIR/scorep/$SCOREP_VER
-OPARI=/opt/aics/tw20/scorep/REL-1.4.2
-
-binutils="binutils-2.23.2.tar.gz"
-EDITED_DIR=$CURDIR/edited
+SCOREPDIR="$BASEDIR/scorep/$SCOREP_VER"
+OPARI="/opt/aics/tw20/scorep/REL-1.4.2"
+PDT_DISTR_TAR="pdtoolkit-$PDT_VER.tar.gz"
+TAU_DISTR_TAR="tau-$TAU_VER.tar.gz"
+BINUTIL_DISTR_TAR="binutils-2.23.2.tar.gz"
+EDITED_DIR="$CURDIR/edited"
 
 CONFIGURE_OPTIONS_sparc="-pdt=$PDT_DIR -pdt_c++=g++ -arch=sparc64fx -prefix=$TAU_DIR  -c++=mpiFCCpx -cc=mpifccpx -fortran=mpifrtpx -mpi -bfd=download -iowrapper -TRACE"
 CONFIGURE_OPTIONS_x8664="-pdt=$PDT_DIR -pdt_c++=g++ -arch=x86_64 -prefix=$TAU_DIR -bfd=download -iowrapper -TRACE"
@@ -37,11 +38,16 @@ function install_pdt {
         mkdir -p "$BASEDIR"
     fi
     cd $BASEDIR
-    if [[ ! -a pdtoolkit-$PDT_VER.tar.gz ]]; then
-    	echo "Downloading PDT $PDT_VER to $(pwd)"
-        wget https://www.cs.uoregon.edu/research/tau/pdt_releases/pdtoolkit-$PDT_VER.tar.gz
+    # Use downloaded files if exist
+    if [[ -f "$CURDIR/$TARFILES_DIR/$PDT_DISTR_TAR" ]]; then
+        echo "Using downloaded file $CURDIR/$TARFILES_DIR/$PDT_DISTR_TAR"
+        cp $CURDIR/$TARFILES_DIR/$PDT_DISTR_TAR $BASEDIR/
     fi
-    tar -xzf pdtoolkit-$PDT_VER.tar.gz
+    if [[ ! -f "$BASEDIR/$PDT_DISTR_TAR" ]]; then
+        echo "Downloading PDT $PDT_VER to $(pwd)"
+        wget https://www.cs.uoregon.edu/research/tau/pdt_releases/$PDT_DISTR_TAR
+    fi
+    tar -xzf $PDT_DISTR_TAR
     if [[ ! -d $PDT_DIR ]]; then
         mkdir -p $PDT_DIR
     fi
@@ -61,22 +67,34 @@ function install_tau {
     echo "* Install TAU $TAU_VER "
     echo "**********************"
     cd $BASEDIR
-    if [[ ! -a tau-$TAU_VER.tar.gz ]]; then
-        wget https://www.cs.uoregon.edu/research/tau/tau_releases/tau-$TAU_VER.tar.gz
+    # Use downloaded files if exist
+    if [[ -f "$CURDIR/$TARFILES_DIR/$BINUTIL_DISTR_TAR" ]]; then
+        echo "Using downloaded file $CURDIR/$TARFILES_DIR/$BINUTIL_DISTR_TAR"
+        cp $CURDIR/$TARFILES_DIR/$BINUTIL_DISTR_TAR $BASEDIR/
+    fi
+    if [[ -f "$CURDIR/$TARFILES_DIR/$TAU_DISTR_TAR" ]]; then
+        echo "Using downloaded file $CURDIR/$TARFILES_DIR/$TAU_DISTR_TAR"
+        cp $CURDIR/$TARFILES_DIR/$TAU_DISTR_TAR $BASEDIR/
+    fi
+    if [[ ! -f "$TAU_DISTR_TAR" ]]; then
+        echo "Downloading $TAU_DISTR_TAR"
+        wget "https://www.cs.uoregon.edu/research/tau/tau_releases/$TAU_DISTR_TAR"
     fi
     # Copy binutils if already downloaded
-    if [[ -a "$binutils" ]]; then
-        echo "Use downloaded binutils"
+    if [[ -f "$BINUTIL_DISTR_TAR" ]]; then
+        echo "Using downloaded binutils $BINUTIL_DISTR_TAR"
         mkdir -p "$TAU_DIR/external_dependencies"
-        cp "$binutils" "$TAU_DIR/external_dependencies/$binutils"
+        cp "$BINUTIL_DISTR_TAR" "$TAU_DIR/external_dependencies/$BINUTIL_DISTR_TAR"
     fi
     if [[ ! -d $TAU_DIR ]]; then
-        tar -xzf tau-$TAU_VER.tar.gz -C $BASEDIR
+        echo "Extracting TAU distribution files into $TAU_DIR"
+        tar -xzf "$TAU_DISTR_TAR" -C $BASEDIR
     fi
     # Copy edited files
     cp -R $EDITED_DIR/* $TAU_DIR/
     cd $TAU_DIR
-    ./configure -pdt=$CONFIGURE_OPTIONS_sparc
+    echo "Configuring TAU with options $CONFIGURE_OPTIONS_sparc"
+    ./configure $CONFIGURE_OPTIONS_sparc
     make install
     cd $CURDIR
 }
@@ -126,18 +144,18 @@ function install_tau_scorep {
 }
 
 function install_traceconv {
-	cd $CURDIR
-	files=(traceconvert.sh traceconv.sh)
-	for	filename in ${files[@]}; do
-		if [ ! -f "$TAU_DIR/x86_64/bin/$filename" ]; then
-			echo "Copying $filename to $TAU_DIR/x86_64/bin"
-			if [ ! -f "./$filename" ]; then
-				echo "File $filename not found!"
-			else
-				cp ./$filename $TAU_DIR/x86_64/bin/
-			fi
-		fi
-	done
+    cd $CURDIR
+    files=(traceconvert.sh traceconv.sh)
+    for filename in ${files[@]}; do
+        if [ ! -f "$TAU_DIR/x86_64/bin/$filename" ]; then
+            echo "Copying $filename to $TAU_DIR/x86_64/bin"
+            if [ ! -f "./$filename" ]; then
+                echo "File $filename not found!"
+            else
+                cp ./$filename $TAU_DIR/x86_64/bin/
+            fi
+        fi
+    done
 }
 
 if [[ -n "$1" ]]; then
@@ -154,14 +172,14 @@ if [[ -n "$1" ]]; then
         cd $TAU_DIR
         ./configure $CONFIGURE_OPTIONS_x8664
         make install
-		install_traceconv
-		cd -
+        install_traceconv
+        cd -
         exit 0
     elif [[ "$1" == "sparc64fx" ]]; then 
         cd $TAU_DIR
         ./configure -arch=sparc64fx
         make install
-		cd -
+        cd -
         exit 0
     elif [[ "$1" == "install" ]]; then
         install_pdt
