@@ -201,6 +201,7 @@ if [[ -n "$1" ]]; then
         #./configure -openmp -opari=$OPARI -bfd=download -pdt=$PDT_DIR -pdt_c++=g++ -prefix=$TAU_DIR -arch=sparc64fx -c++=mpiFCCpx -cc=mpifccpx -fortran=mpifrtpx -mpi -DISABLESHARED 
         make install
         cd -
+        exit 0
     fi
 fi
 
