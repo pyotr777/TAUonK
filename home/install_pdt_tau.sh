@@ -13,6 +13,7 @@
 
 CURDIR="$(pwd)"
 TARFILES_DIR="files"
+EDITED_DIR="edited"
 BASEDIR="$HOME/TAU"
 PDT_VER="3.22"
 TAU_VER="2.25.1"
@@ -24,7 +25,6 @@ OPARI="/opt/aics/tw20/scorep/REL-1.4.2"
 PDT_DISTR_TAR="pdtoolkit-$PDT_VER.tar.gz"
 TAU_DISTR_TAR="tau-$TAU_VER.tar.gz"
 BINUTIL_DISTR_TAR="binutils-2.23.2.tar.gz"
-EDITED_DIR="$CURDIR/edited"
 
 CONFIGURE_OPTIONS_sparc="-pdt=$PDT_DIR -pdt_c++=g++ -arch=sparc64fx -prefix=$TAU_DIR  -c++=mpiFCCpx -cc=mpifccpx -fortran=mpifrtpx -mpi -bfd=download -iowrapper -TRACE"
 CONFIGURE_OPTIONS_x8664="-pdt=$PDT_DIR -pdt_c++=g++ -arch=x86_64 -prefix=$TAU_DIR -bfd=download -iowrapper -TRACE"
@@ -86,13 +86,14 @@ function install_tau {
         mkdir -p "$TAU_DIR/external_dependencies"
         cp "$BINUTIL_DISTR_TAR" "$TAU_DIR/external_dependencies/$BINUTIL_DISTR_TAR"
     fi
-    if [[ ! -d $TAU_DIR ]]; then
+    if [[ ! -d "$TAU_DIR" || ! -f "$TAU_DIR/configure" ]]; then
         echo "Extracting TAU distribution files into $TAU_DIR"
         tar -xzf "$TAU_DISTR_TAR" -C $BASEDIR
     fi
     # Copy edited files
-    cp -R $EDITED_DIR/* $TAU_DIR/
+    cp -R $CURDIR/$TARFILES_DIR/$EDITED_DIR/* $TAU_DIR/
     cd $TAU_DIR
+    pwd
     echo "Configuring TAU with options $CONFIGURE_OPTIONS_sparc"
     ./configure $CONFIGURE_OPTIONS_sparc
     make install
