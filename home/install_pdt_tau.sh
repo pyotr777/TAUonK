@@ -41,11 +41,12 @@ function install_pdt {
     	echo "Downloading PDT $PDT_VER to $(pwd)"
         wget https://www.cs.uoregon.edu/research/tau/pdt_releases/pdtoolkit-$PDT_VER.tar.gz
     fi
-    tar -xzvf pdtoolkit-$PDT_VER.tar.gz
+    tar -xzf pdtoolkit-$PDT_VER.tar.gz
     if [[ ! -d $PDT_DIR ]]; then
         mkdir -p $PDT_DIR
     fi
     cd pdtoolkit-$PDT_VER
+    pwd
     ./configure -prefix=$PDT_DIR
     gmake
     gmake install
@@ -70,7 +71,7 @@ function install_tau {
         cp "$binutils" "$TAU_DIR/external_dependencies/$binutils"
     fi
     if [[ ! -d $TAU_DIR ]]; then
-        tar -xzvf tau-$TAU_VER.tar.gz -C $BASEDIR
+        tar -xzf tau-$TAU_VER.tar.gz -C $BASEDIR
     fi
     # Copy edited files
     cp -R $EDITED_DIR/* $TAU_DIR/
