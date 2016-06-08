@@ -26,7 +26,7 @@ SCOREPDIR="$BASEDIR/scorep/$SCOREP_VER"
 OPARI="/opt/aics/tw20/scorep/REL-1.4.2"
 PDT_DISTR_TAR="pdtoolkit-$PDT_VER.tar.gz"
 TAU_DISTR_TAR="tau-$TAU_VER.tar.gz"
-BINUTIL_DISTR_TAR="binutils-2.23.2.tar.gz"
+# BINUTIL_DISTR_TAR="binutils-2.23.2.tar.gz"
 
 CONFIGURE_OPTIONS_sparc="-pdt=$PDT_DIR -pdt_c++=g++ -arch=sparc64fx -prefix=$TAU_DIR  -c++=mpiFCCpx -cc=mpifccpx -fortran=mpifrtpx -mpi -bfd=download -iowrapper -TRACE"
 CONFIGURE_OPTIONS_x8664="-pdt=$PDT_DIR -pdt_c++=g++ -arch=x86_64 -prefix=$TAU_DIR -bfd=download -iowrapper -TRACE"
@@ -79,12 +79,12 @@ function install_tau {
         echo "Downloading $TAU_DISTR_TAR"
         wget "https://www.cs.uoregon.edu/research/tau/tau_releases/$TAU_DISTR_TAR"
     fi
-    # Copy binutils if already downloaded
-    if [[ -f "$BINUTIL_DISTR_TAR" ]]; then
-        echo "Using downloaded binutils $BINUTIL_DISTR_TAR"
-        mkdir -p "$TAU_DIR/external_dependencies"
-        cp "$BINUTIL_DISTR_TAR" "$TAU_DIR/external_dependencies/$BINUTIL_DISTR_TAR"
-    fi
+#    # Copy binutils if already downloaded
+#    if [[ -f "$BINUTIL_DISTR_TAR" ]]; then
+#        echo "Using downloaded binutils $BINUTIL_DISTR_TAR"
+#        mkdir -p "$TAU_DIR/external_dependencies"
+#        cp "$BINUTIL_DISTR_TAR" "$TAU_DIR/external_dependencies/$BINUTIL_DISTR_TAR"
+#    fi
     if [[ ! -d "$TAU_DIR" || ! -f "$TAU_DIR/configure" ]]; then
         echo "Extracting TAU distribution files into $TAU_DIR"
         tar -xzf "$TAU_DISTR_TAR" -C $BASEDIR
