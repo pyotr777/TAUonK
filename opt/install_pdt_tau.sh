@@ -158,7 +158,7 @@ function install_traceconv {
 }
 
 if [[ -n "$1" ]]; then
-    read -r -p "This will install PDT and TAU in /opt/aics/TAU folder. Continue? [Y/n] " input
+    read -r -p "This will install PDT and TAU in $BASEDIR folder. Continue? [Y/n] " input
     case $input in
         [yY][eE][sS]|[yY])
             echo "Installing..."
